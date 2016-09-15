@@ -8,8 +8,6 @@ This has only been tested on a fenix3 and on the simulator (for a fenix3), altho
 
 One thing I noticed in the simulator is if the ANIM_TIME constant is made 0.2 then there are drawing errors but on the actual watch there are none.
 
-There are no copyright or licensing terms and you are free to use it as you wish, but at your own risk.
-
 A rather trivial app is included to demonstrate its use.
 
 == LICENCE
