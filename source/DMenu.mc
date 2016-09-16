@@ -2,9 +2,15 @@ using Toybox.WatchUi as Ui;
 using Toybox.System as Sys;
 using Toybox.Graphics as Gfx;
 
-// Inherit from this if you want to store additional information in the menu entry.
+// Inherit from this if you want to store additional information in the menu entry and/or change how 
+// the menu is drawn - for example adding in a status icon.
 class DMenuItem
 {
+	const LABEL_FONT = Gfx.FONT_SMALL;
+	const SELECTED_LABEL_FONT = Gfx.FONT_LARGE;
+	const VALUE_FONT = Gfx.FONT_MEDIUM;
+	const PAD = 0;
+
 	var	id, label, value, userData;
 	var index;		// filled in with its index, if selected
 	
@@ -20,6 +26,68 @@ class DMenuItem
 		label = _label;
 		value = _value;
 		userData = _userData;
+	}
+
+	function draw (dc, y, highlight)
+	{
+
+		if (highlight)
+		{
+			setHighlightColor (dc);
+			drawHighlightedLabel (dc, y);
+		}
+		else
+		{
+			setColor (dc);
+			drawLabel (dc, y);
+		}
+	}
+	
+	function setHighlightColor (dc)
+	{
+		dc.setColor (Gfx.COLOR_BLACK, Gfx.COLOR_WHITE);
+	}
+	
+	function setColor (dc)
+	{
+		dc.setColor (Gfx.COLOR_BLACK, Gfx.COLOR_WHITE);
+	}
+	
+	function drawLabel (dc, y)
+	{
+		var width = dc.getWidth ();
+		var h3 = dc.getHeight () / 3;
+		var lab = label.toString ();
+		var labDims = dc.getTextDimensions (lab, LABEL_FONT);
+		var yL = y + (h3 - labDims[1]) / 2;
+
+		dc.drawText (width / 2, yL, LABEL_FONT, lab, Gfx.TEXT_JUSTIFY_CENTER);
+	}
+
+	function drawHighlightedLabel (dc, y)
+	{
+		var width = dc.getWidth ();
+		var h3 = dc.getHeight () / 3;
+		var lab = label.toString ();
+		var labDims = dc.getTextDimensions (lab, SELECTED_LABEL_FONT);
+		var yL, yV, h;
+
+		if (value != null)
+		{
+			// Show label and value.
+			var val = value.toString ();
+			var valDims = dc.getTextDimensions (val, VALUE_FONT);
+
+			h = labDims[1] + valDims[1] + PAD;
+			yL = y + (h3 - h) / 2;
+			yV = yL + labDims[1] + PAD;
+			dc.drawText (width / 2, yV, VALUE_FONT, val, Gfx.TEXT_JUSTIFY_CENTER);
+		}
+		else
+		{
+			yL = y + (h3 - labDims[1]) / 2;
+		}
+		dc.drawText (width / 2, yL, SELECTED_LABEL_FONT, lab, Gfx.TEXT_JUSTIFY_CENTER);
 	}
 }
 
@@ -141,10 +209,6 @@ class DMenu extends Ui.View
 class DrawMenu extends Ui.Drawable
 {
 	const TITLE_FONT = Gfx.FONT_SMALL;
-	const LABEL_FONT = Gfx.FONT_SMALL;
-	const SELECTED_LABEL_FONT = Gfx.FONT_LARGE;
-	const VALUE_FONT = Gfx.FONT_MEDIUM;
-	const PAD = 0;
 
 	var t = 0;				// 'time' in the animation cycle 0...1000 or -1000...0.
 	var index, nextIndex, menu;
@@ -212,32 +276,7 @@ class DrawMenu extends Ui.Drawable
 			return;
 		}
 		
-		var labelFont = highlight ? SELECTED_LABEL_FONT : LABEL_FONT;
-		dc.setColor (Gfx.COLOR_BLACK, Gfx.COLOR_WHITE);
-
-		var label = menu.menuArray[idx].label.toString ();
-		var labelDims = dc.getTextDimensions (label, labelFont);
-		var width = dc.getWidth ();
-		var yL, yV, h;
-		
-		if (highlight && menu.menuArray[idx].value != null)
-		{
-			// Show label and value.
-			var value = menu.menuArray[idx].value.toString ();
-			var valDims = dc.getTextDimensions (value, VALUE_FONT);
-
-			h = labelDims[1] + valDims[1] + PAD;
-			yL = y + (h3 - h) / 2;
-			yV = yL + labelDims[1] + PAD;
-			dc.drawText (width / 2, yL, labelFont, label, Gfx.TEXT_JUSTIFY_CENTER);
-			dc.drawText (width / 2, yV, VALUE_FONT, value, Gfx.TEXT_JUSTIFY_CENTER);
-		}
-		else
-		{
-			// Just show label.
-			yL = y + (h3 - labelDims[1]) / 2;
-			dc.drawText (width / 2, yL, labelFont, label, Gfx.TEXT_JUSTIFY_CENTER);
-		}
+		menu.menuArray[idx].draw (dc, y, highlight);
 	}
 }
 
