@@ -120,6 +120,21 @@ class DMenu extends Ui.View
 	{
 		drawMenu = null;
 	}
+
+	// Return the menuItem with the matching id.  The menu item has its index field updated
+	// with the index it was found at.  Returns null if not found.
+	function itemWithId (id)
+	{
+		for (var idx = 0; idx < menuArray.size (); idx++)
+		{
+			if (menuArray[idx].id == id)
+			{
+				menuArray[idx].index = idx;
+				return menuArray[idx];
+			}
+		}
+		return null;
+	}
 	
 	const ANIM_TIME = 0.3;
 	function updateIndex (offset)
@@ -203,7 +218,7 @@ class DMenu extends Ui.View
 			y = dc.getHeight () - TS - GAP;
 			dc.fillPolygon ([[x - TS, y], [x + TS, y], [x, y+ TS]]);
 		}	
-	}
+	}	
 }
 
 // Done as a class so it can be animated.
