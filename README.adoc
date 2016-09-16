@@ -1,4 +1,4 @@
--- Dynamic Menu for Garmin CIQ
+== Dynamic Menu for Garmin CIQ
 
 DMenu.mc is an implementation of a dynamic menu where the menu ordering and length can be changed and an optional value line can be shown below the menu item name.  
 
@@ -10,7 +10,7 @@ One thing I noticed in the simulator is if the ANIM_TIME constant is made 0.2 th
 
 A rather trivial app is included to demonstrate its use.  Every other alarm will show an icon and selecting an alarm will toggle the On/Off status.
 
--- Changing The Look of a Menu
+== Changing The Look of a Menu
 
 The DMenuItem class holds details about a menu item such as its name and any value to display when the item is in the selectable position.
 
@@ -27,7 +27,7 @@ In the IconMenu sample the icon is only shown when the menu item is selectable (
 
 Note use is made of duck typing and any class can be added to the menuArray providing it has a draw method and has an index instance variable that is set to pass the index of the selected menu item incase the selected behaviour needs to modify the array in some way, for example delete the selected menu item.
 
--- LICENCE
+== LICENCE
 
 Licence MIT
 
