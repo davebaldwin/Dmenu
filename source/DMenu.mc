@@ -4,6 +4,7 @@ using Toybox.Graphics as Gfx;
 
 // Inherit from this if you want to store additional information in the menu entry and/or change how 
 // the menu is drawn - for example adding in a status icon.
+// Any overridden drawing should be constrained within the items boundaries, i.e. y .. y + height / 3.
 class DMenuItem
 {
 	const LABEL_FONT = Gfx.FONT_SMALL;

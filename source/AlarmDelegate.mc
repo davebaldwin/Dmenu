@@ -27,7 +27,17 @@ class AlarmDelegate extends Ui.MenuInputDelegate {
 			var value = on ? "On" : "Off";
 
 			var countStr = Lang.format("($1$)  ", [count]);
-			var alarmItem = new DMenuItem (count, countStr + timeStr, value, alarm);
+			var alarmItem;
+			
+			if (count & 1 == 0)
+			{	
+				var bitmap = Ui.loadResource (Rez.Drawables.LauncherIcon);
+				alarmItem = new IconMenu (count, countStr + timeStr, value, alarm, bitmap);
+			}
+			else
+			{
+				alarmItem = new DMenuItem (count, countStr + timeStr, value, alarm);
+			}
 			
 			// Insert new alarm just before the AddAlarm entry.  This has the benefit of also
 			// being the newly selectable menu item, otherwise view.index could be updated.

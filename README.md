@@ -1,16 +1,33 @@
-== Dynamic Menu for Garmin CIQ
+-- Dynamic Menu for Garmin CIQ
 
 DMenu.mc is an implementation of a dynamic menu where the menu ordering and length can be changed and an optional value line can be shown below the menu item name.  
 
-It is similar to how the Alarm Clock menu (menu -> Clock -> Alarm Clock) works. The only feature not supported is showing a status icon.
+It is similar to how the Alarm Clock menu (menu -> Clock -> Alarm Clock) works.
 
 This has only been tested on a fenix3 and on the simulator (for a fenix3), although I don't think there is any device specific code.
 
 One thing I noticed in the simulator is if the ANIM_TIME constant is made 0.2 then there are drawing errors but on the actual watch there are none.
 
-A rather trivial app is included to demonstrate its use.
+A rather trivial app is included to demonstrate its use.  Every other alarm will show an icon and selecting an alarm will toggle the On/Off status.
 
-== LICENCE
+-- Changing The Look of a Menu
+
+The DMenuItem class holds details about a menu item such as its name and any value to display when the item is in the selectable position.
+
+To change how a selectable or non selectable menu item looks derive a new class, extending DMenuItem (as IconMenu does in the test example).
+
+You can replace or extend the following functions to augment or replace how a menu item is drawn.
+
+* setHighlightColor (dc)
+* setColor (dc)
+* function drawLabel (dc, y)
+* function drawHighlightedLabel (dc, y)
+
+In the IconMenu sample the icon is only shown when the menu item is selectable (i.e. highlighted) and the menu item is drawn as standard and then the icon is drawn.
+
+Note use is made of duck typing and any class can be added to the menuArray providing it has a draw method and has an index instance variable that is set to pass the index of the selected menu item incase the selected behaviour needs to modify the array in some way, for example delete the selected menu item.
+
+-- LICENCE
 
 Licence MIT
 
