@@ -330,5 +330,6 @@ class DMenuDelegate extends Ui.BehaviorDelegate
     function onBack () 
 	{
         Ui.popView (Ui.SLIDE_LEFT);
+		return true;
     }
 }
