@@ -199,24 +199,37 @@ class DMenu extends Ui.View
 	
 	const GAP = 5;
 	const TS = 5;
-
+	
+	// The arrows are drawn with lines as polygons don't give different sized triangles depending
+	// on their orientation.
 	function drawArrows (dc)
 	{
 		var x = dc.getWidth () / 2;
 		var y;
 
+		dc.setPenWidth (1);
         dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_WHITE);
 		
 		if (nextIndex != 0)
 		{
 			y = GAP;
-			dc.fillPolygon ([[x, y], [x + TS, y + TS], [x - TS, y + TS]]);
+			
+			for (var i = 0; i < TS; i++)
+			{
+				dc.drawLine (x - i, y + i, x + i + 1, y + i);
+			}
 		}	
 
 		if (nextIndex != menuArray.size () - 1)
 		{
 			y = dc.getHeight () - TS - GAP;
-			dc.fillPolygon ([[x - TS, y], [x + TS, y], [x, y+ TS]]);
+			
+			var d;
+			for (var i = 0; i < TS; i++)
+			{
+				d = TS - 1 - i;
+				dc.drawLine (x - d, y + i, x + d + 1, y + i);
+			}
 		}	
 	}	
 }
