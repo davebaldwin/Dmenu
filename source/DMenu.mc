@@ -101,10 +101,10 @@ class DMenu extends Ui.View
 	var nextIndex;
 	hidden var drawMenu;
 	
-	function initialize (_menuArray, _memuTitle)
+	function initialize (_menuArray, _menuTitle)
 	{
 		menuArray = _menuArray;
-		title = _memuTitle;
+		title = _menuTitle;
 		index = 0;
 		nextIndex = 0;
 		
