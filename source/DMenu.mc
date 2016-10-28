@@ -263,11 +263,10 @@ class DrawMenu extends Ui.Drawable
 		// these will be unnecessary but it is easier to draw everything and
 		// rely on clipping to avoid unnecessary drawing calls.
 		drawTitle (dc, y - nextIndex * h3 - h3);
-		drawItem (dc, nextIndex - 2, y + h3 * -2, false);
-		drawItem (dc, nextIndex - 1, y + h3 * -1, false);
-		drawItem (dc, nextIndex    , y + h3 *  0, true);
-		drawItem (dc, nextIndex + 1, y + h3 *  1, false);	
-		drawItem (dc, nextIndex + 2, y + h3 *  2, false);	
+		for (var i = -2; i < 3; i++)
+		{
+			drawItem (dc, nextIndex + i, y + h3 * i, i == 0);
+		}
 	}
 	
 	function drawTitle (dc, y)
