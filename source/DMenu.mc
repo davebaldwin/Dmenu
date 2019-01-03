@@ -181,6 +181,11 @@ class DMenu extends Ui.View
         dc.fillRectangle(0, 0, width, height);
 
 		// Draw the menu items.
+		if (drawMenu == null)
+		{
+			return;
+		}
+		
 		drawMenu.index = index;
 		drawMenu.nextIndex = nextIndex;
 		drawMenu.menu = self;
