@@ -138,6 +138,12 @@ class DMenu extends Ui.View
 		return null;
 	}
 	
+	function animateComplete()
+	{
+		drawMenu.t = 0;
+		WatchUi.requestUpdate();
+	}
+	
 	const ANIM_TIME = 0.3;
 	function updateIndex (offset)
 	{
@@ -149,12 +155,12 @@ class DMenu extends Ui.View
 		if (offset == 1)
 		{
 			// Scroll down. Use 1000 as end value as cannot use 1. Scale as necessary in draw call.
-			Ui.animate (drawMenu, :t, Ui.ANIM_TYPE_LINEAR, 1000, 0, ANIM_TIME, null);
+			Ui.animate (drawMenu, :t, Ui.ANIM_TYPE_LINEAR, 1000, 0, ANIM_TIME, method(:animateComplete));
 		}
 		else
 		{
 			// Scroll up.
-			Ui.animate (drawMenu, :t, Ui.ANIM_TYPE_LINEAR, -1000, 0, ANIM_TIME, null);
+			Ui.animate (drawMenu, :t, Ui.ANIM_TYPE_LINEAR, -1000, 0, ANIM_TIME, method(:animateComplete));
 		}
 		
 		nextIndex = index + offset;
