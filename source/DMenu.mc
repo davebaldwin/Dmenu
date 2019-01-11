@@ -144,7 +144,8 @@ class DMenu extends Ui.View
 		WatchUi.requestUpdate();
 	}
 	
-	const ANIM_TIME = 0.3;
+	//const ANIM_TIME = 0.3;
+	const ANIM_TIME = 0; //disable animation
 	function updateIndex (offset)
 	{
 		if (menuArray.size () <= 1)
@@ -155,12 +156,18 @@ class DMenu extends Ui.View
 		if (offset == 1)
 		{
 			// Scroll down. Use 1000 as end value as cannot use 1. Scale as necessary in draw call.
-			Ui.animate (drawMenu, :t, Ui.ANIM_TYPE_LINEAR, 1000, 0, ANIM_TIME, method(:animateComplete));
+			if (ANIM_TIME > 0)
+			{
+				Ui.animate (drawMenu, :t, Ui.ANIM_TYPE_LINEAR, 1000, 0, ANIM_TIME, method(:animateComplete));
+			}
 		}
 		else
 		{
 			// Scroll up.
-			Ui.animate (drawMenu, :t, Ui.ANIM_TYPE_LINEAR, -1000, 0, ANIM_TIME, method(:animateComplete));
+			if (ANIM_TIME > 0)
+			{
+				Ui.animate (drawMenu, :t, Ui.ANIM_TYPE_LINEAR, -1000, 0, ANIM_TIME, method(:animateComplete));
+			}
 		}
 		
 		nextIndex = index + offset;
