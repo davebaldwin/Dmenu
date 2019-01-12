@@ -101,6 +101,8 @@ class DMenu extends Ui.View
 	var nextIndex;
 	hidden var drawMenu;
 	
+	var menuHeight = null;
+	
 	function initialize (_menuArray, _menuTitle)
 	{
 		menuArray = _menuArray;
@@ -136,7 +138,14 @@ class DMenu extends Ui.View
 		return null;
 	}
 	
-	const ANIM_TIME = 0.3;
+	function animateComplete()
+	{
+		drawMenu.t = 0;
+		WatchUi.requestUpdate();
+	}
+	
+	//const ANIM_TIME = 0.3;
+	const ANIM_TIME = 0; //disable animation
 	function updateIndex (offset)
 	{
 		if (menuArray.size () <= 1)
@@ -147,12 +156,18 @@ class DMenu extends Ui.View
 		if (offset == 1)
 		{
 			// Scroll down. Use 1000 as end value as cannot use 1. Scale as necessary in draw call.
-			Ui.animate (drawMenu, :t, Ui.ANIM_TYPE_LINEAR, 1000, 0, ANIM_TIME, null);
+			if (ANIM_TIME > 0)
+			{
+				Ui.animate (drawMenu, :t, Ui.ANIM_TYPE_LINEAR, 1000, 0, ANIM_TIME, method(:animateComplete));
+			}
 		}
 		else
 		{
 			// Scroll up.
-			Ui.animate (drawMenu, :t, Ui.ANIM_TYPE_LINEAR, -1000, 0, ANIM_TIME, null);
+			if (ANIM_TIME > 0)
+			{
+				Ui.animate (drawMenu, :t, Ui.ANIM_TYPE_LINEAR, -1000, 0, ANIM_TIME, method(:animateComplete));
+			}
 		}
 		
 		nextIndex = index + offset;
@@ -176,11 +191,16 @@ class DMenu extends Ui.View
 	{
 		var width = dc.getWidth ();
 		var height = dc.getHeight ();
-		
+		menuHeight = height;
         dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_BLACK);
         dc.fillRectangle(0, 0, width, height);
 
 		// Draw the menu items.
+		if (drawMenu == null)
+		{
+			return;
+		}
+		
 		drawMenu.index = index;
 		drawMenu.nextIndex = nextIndex;
 		drawMenu.menu = self;
@@ -320,7 +340,52 @@ class DMenuDelegate extends Ui.BehaviorDelegate
 		BehaviorDelegate.initialize ();
 	}
 	
-	function onNextPage ()
+	function onSwipe(swipeEvent)
+	{
+		var d = swipeEvent.getDirection();
+		if (d == WatchUi.SWIPE_UP)
+		{
+			return onNextPage();
+		} 
+		if (d == WatchUi.SWIPE_DOWN)
+		{
+			return onPreviousPage();
+		} 
+		
+		return false;
+		
+	}
+	
+	function onTap(clickEvent)
+	{
+		var c = clickEvent.getCoordinates();
+		var t = clickEvent.getType();
+		
+		if (t == WatchUi.CLICK_TYPE_TAP)
+		{
+			if (menu.menuHeight != null)
+			{
+				var h3 = menu.menuHeight  / 3;
+				if (c[1] > h3*2)
+				{
+					return onNextPage();
+				} 
+				else if (c[1] < h3)
+				{
+					return onPreviousPage();
+				}
+			}
+			
+			userMenuDelegate.onMenuItem (menu.selectedItem ());
+			Ui.requestUpdate();
+			return true;
+		} 
+		return false;
+		
+	}
+	
+	
+	function onNextPage()
 	{
 		menu.updateIndex (1);
 		return true;
@@ -334,9 +399,19 @@ class DMenuDelegate extends Ui.BehaviorDelegate
 	
 	function onSelect ()
 	{
-		userMenuDelegate.onMenuItem (menu.selectedItem ());
-		Ui.requestUpdate();
-		return true;
+		return false;
+	}
+	
+	function onKey(keyEvent) {
+		var k = keyEvent.getKey();
+		
+		if (k == WatchUi.KEY_START || k == WatchUi.KEY_ENTER )
+		{		
+			userMenuDelegate.onMenuItem (menu.selectedItem ());
+			Ui.requestUpdate();
+			return true;
+		}
+		return false;
 	}
 	
     function onBack () 
