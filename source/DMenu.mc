@@ -144,8 +144,8 @@ class DMenu extends Ui.View
 		WatchUi.requestUpdate();
 	}
 	
-	const ANIM_TIME = 0.3;
-	//const ANIM_TIME = 0; //disable animation
+	//const ANIM_TIME = 0.3;
+	const ANIM_TIME = 0; //disable animation
 	function updateIndex (offset)
 	{
 		if (menuArray.size () <= 1)
