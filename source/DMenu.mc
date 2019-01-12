@@ -146,6 +146,12 @@ class DMenu extends Ui.View
 	
 	//const ANIM_TIME = 0.3;
 	const ANIM_TIME = 0; //disable animation
+	// NOTE: animation seems to be broken on physical devices like 630 (and maybe its
+	// siblings like 230, 235, and 735XT)
+	// https://forums.garmin.com/forum/developers/connect-iq/158754-
+	//
+	// I don't recommend enabling animation unless you are sure it will work
+	// on the devices you are targetting.
 	function updateIndex (offset)
 	{
 		if (menuArray.size () <= 1)
