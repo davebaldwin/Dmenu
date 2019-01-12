@@ -266,7 +266,7 @@ class DrawMenu extends Ui.Drawable
 		
 		nextIndex = menu.nextIndex;
 
-		System.println("t = " + t);
+		//System.println("t = " + t);
 		// y for the middle of the three items.  
 		var y = h3 + (t / 1000.0) * h3;
 		
