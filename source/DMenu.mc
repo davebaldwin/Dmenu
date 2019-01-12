@@ -144,8 +144,8 @@ class DMenu extends Ui.View
 		WatchUi.requestUpdate();
 	}
 	
-	//const ANIM_TIME = 0.3;
-	const ANIM_TIME = 0; //disable animation
+	const ANIM_TIME = 0.3;
+	//const ANIM_TIME = 0; //disable animation
 	function updateIndex (offset)
 	{
 		if (menuArray.size () <= 1)
@@ -153,21 +153,11 @@ class DMenu extends Ui.View
 			return;
 		}
 		
-		if (offset == 1)
+		if (ANIM_TIME > 0)
 		{
-			// Scroll down. Use 1000 as end value as cannot use 1. Scale as necessary in draw call.
-			if (ANIM_TIME > 0)
-			{
-				Ui.animate (drawMenu, :t, Ui.ANIM_TYPE_LINEAR, 1000, 0, ANIM_TIME, method(:animateComplete));
-			}
-		}
-		else
-		{
-			// Scroll up.
-			if (ANIM_TIME > 0)
-			{
-				Ui.animate (drawMenu, :t, Ui.ANIM_TYPE_LINEAR, -1000, 0, ANIM_TIME, method(:animateComplete));
-			}
+			// Scroll up/down. Use +/-1000 as end value as cannot use 1. Scale as necessary in draw call.
+			drawMenu.t = offset * 1000;
+			Ui.animate (drawMenu, :t, Ui.ANIM_TYPE_LINEAR, drawMenu.t, 0, ANIM_TIME, method(:animateComplete));
 		}
 		
 		nextIndex = index + offset;
@@ -276,6 +266,7 @@ class DrawMenu extends Ui.Drawable
 		
 		nextIndex = menu.nextIndex;
 
+		System.println("t = " + t);
 		// y for the middle of the three items.  
 		var y = h3 + (t / 1000.0) * h3;
 		
