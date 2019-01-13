@@ -397,17 +397,36 @@ class DMenuDelegate extends Ui.BehaviorDelegate
 		return true;		
 	}
 
-	
-	function onNextPage()
+	function onNextPage_key()
 	{
 		menu.updateIndex(1, true);
 		return true;
 	}
 	
-	function onPreviousPage()
+	function onPreviousPage_key()
 	{
 		menu.updateIndex(-1, true);
 		return true;		
+	}
+	
+	// Sadly we can't handle onNextPage/onPreviousPage(), because
+	//   device behaviour is inconsistent:
+	// - Vivoactive, VAHR and 630 trigger these behaviours on left/right swipe 
+	//      (which doesn't make sense for vertical menu)
+	// - Vivoactive does not even support up/down swipe, so tap support
+	//   is mandatory
+	// - VA3 triggers these behaviour on up/down swipe
+	//
+	// The only thing to do is to handle the keys, swipes, and taps
+	// directly
+	function onNextPage()
+	{
+		return false;
+	}
+	
+	function onPreviousPage()
+	{
+		return false;
 	}
 	
 	function onSelect ()
@@ -417,6 +436,16 @@ class DMenuDelegate extends Ui.BehaviorDelegate
 	
 	function onKey(keyEvent) {
 		var k = keyEvent.getKey();
+		
+		if (k == WatchUi.KEY_UP)
+		{
+			return onPreviousPage_key();
+		}
+		if (k == WatchUi.KEY_DOWN)
+		{
+			return onNextPage_key();
+		}
+		
 		
 		if (k == WatchUi.KEY_START || k == WatchUi.KEY_ENTER )
 		{		
