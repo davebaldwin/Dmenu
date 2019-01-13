@@ -284,7 +284,19 @@ class DrawMenu extends Ui.Drawable
 		// Depending on where we are in the menu and in the animation some of 
 		// these will be unnecessary but it is easier to draw everything and
 		// rely on clipping to avoid unnecessary drawing calls.
-		drawTitle (dc, y - nextIndex * h3 - h3);
+		
+		// Don't animate the title if we're wrap scrolling
+		var titleY;
+		if ((nextIndex == 0 && t < 0) || (nextIndex == 1)) // normal scrolling
+		{
+			titleY = y;
+		}
+		else // wrap scroll
+		{
+			titleY = h3;
+		} 
+		drawTitle (dc, titleY - nextIndex * h3 - h3);
+		
 		for (var i = -2; i < 3; i++)
 		{
 			drawItem (dc, nextIndex + i, y + h3 * i, i == 0);
