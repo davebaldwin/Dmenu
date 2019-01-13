@@ -211,7 +211,10 @@ class DMenu extends Ui.View
 		
 		drawMenu.draw (dc);
 		
-		drawArrows (dc);
+		if (drawMenu.t == 0)
+		{
+			drawArrows (dc);
+		}
 	}
 	
 	const GAP = 5;
