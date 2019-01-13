@@ -259,6 +259,9 @@ class DrawMenu extends Ui.Drawable
 {
 	const TITLE_FONT = Gfx.FONT_SMALL;
 
+	var animateSeparators = true; // 935 animates separators, older watches like 230 and fenix 3 don't
+	var fillEmptySpace = true; // 935 fills unused space with black, fenix 3 doesn't
+
 	var t = 0;				// 'time' in the animation cycle 0...1000 or -1000...0.
 	var index, nextIndex, menu;
 			
@@ -304,26 +307,28 @@ class DrawMenu extends Ui.Drawable
 		dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_WHITE);
 		dc.setPenWidth(2);
 		
+		var separatorY = animateSeparators ? y : h3;
+		
 		/// Line above first item that is only visible
 		// when animating
 		if (t > 0 && nextIndex != 0)
 		{
-			dc.drawLine(0, y - h3, dc.getWidth(), y - h3);
+			dc.drawLine(0, separatorY - h3, dc.getWidth(), separatorY - h3);
 		}
 		
 		// Line below first item
-		if (nextIndex > 0)
+		if (nextIndex > 0 || !animateSeparators)
 		{
-			dc.drawLine(0, y, dc.getWidth(), y);
+			dc.drawLine(0, separatorY, dc.getWidth(), separatorY);
 		}
 		
 		// Line below second item
-		dc.drawLine(0, y + h3, dc.getWidth(), y + h3);
+		dc.drawLine(0, separatorY + h3, dc.getWidth(), separatorY + h3);
 		
 		// Line below third item that is only visible when animating
 		if (t < 0 && nextIndex !=  menu.menuArray.size()-1)
 		{
-			dc.drawLine(0, y + 2 * h3, dc.getWidth(), y + 2 * h3);
+			dc.drawLine(0, separatorY + 2 * h3, dc.getWidth(), separatorY + 2 * h3);
 		}
 	}
 	
@@ -359,8 +364,11 @@ class DrawMenu extends Ui.Drawable
 	
 		if (idx >= menu.menuArray.size())
 		{
-			dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_WHITE);
-			dc.fillRectangle (0, y, dc.getWidth(), height); // using height instead of (height-y) because of rounding issues when animating 
+			if (fillEmptySpace)
+			{
+				dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_WHITE);
+				dc.fillRectangle (0, y, dc.getWidth(), height); // using height instead of (height-y) because of rounding issues when animating 
+			}
 			return;
 		}
 
