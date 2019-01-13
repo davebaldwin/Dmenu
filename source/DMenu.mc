@@ -166,8 +166,10 @@ class DMenu extends Ui.View
 			nextIndex = index;
 			return;
 		}
-		 
-		if (ANIM_TIME > 0)
+		
+		// Don't animate anything if we are wrap scrolling past the bottom
+		// It just looks weird no matter what
+		if (!(offset > 0 && nextIndex >= menuArray.size()) && ANIM_TIME > 0)
 		{
 			// Scroll up/down. Use +/-1000 as end value as cannot use 1. Scale as necessary in draw call.
 			drawMenu.t = offset * 1000;
@@ -208,13 +210,6 @@ class DMenu extends Ui.View
 		drawMenu.menu = self;
 		
 		drawMenu.draw (dc);
-		
-		// Draw the decorations.
-		var h3 = height / 3;
-        dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_WHITE);
-		dc.setPenWidth (2);
-		dc.drawLine (0, h3, width, h3);
-		dc.drawLine (0, h3 * 2, width, h3 * 2);
 		
 		drawArrows (dc);
 	}
@@ -300,6 +295,32 @@ class DrawMenu extends Ui.Drawable
 		for (var i = -2; i < 3; i++)
 		{
 			drawItem (dc, nextIndex + i, y + h3 * i, i == 0);
+			
+		}
+		
+		dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_WHITE);
+		dc.setPenWidth(2);
+		
+		/// Line above first item that is only visible
+		// when animating
+		if (t > 0 && nextIndex != 0)
+		{
+			dc.drawLine(0, y - h3, dc.getWidth(), y - h3);
+		}
+		
+		// Line below first item
+		if (nextIndex > 0)
+		{
+			dc.drawLine(0, y, dc.getWidth(), y);
+		}
+		
+		// Line below second item
+		dc.drawLine(0, y + h3, dc.getWidth(), y + h3);
+		
+		// Line below third item that is only visible when animating
+		if (t < 0 && nextIndex !=  menu.menuArray.size()-1)
+		{
+			dc.drawLine(0, y + 2 * h3, dc.getWidth(), y + 2 * h3);
 		}
 	}
 	
@@ -314,8 +335,9 @@ class DrawMenu extends Ui.Drawable
 			return;
 		}
 
-        dc.setColor (Gfx.COLOR_BLACK, Gfx.COLOR_WHITE);
-        dc.fillRectangle (0, y, width, h3);
+		dc.setColor (Gfx.COLOR_BLACK, Gfx.COLOR_WHITE);
+//        dc.fillRectangle (0, y, width, h3);
+		dc.fillRectangle (0, 0, width, y+h3); // this looks better if we were animating title, which we're not
 
 		if (menu.title != null)
 		{
