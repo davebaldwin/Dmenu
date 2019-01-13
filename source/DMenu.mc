@@ -351,11 +351,19 @@ class DrawMenu extends Ui.Drawable
 	// highlight is the selected menu item that can optionally show a value.
 	function drawItem (dc, idx, y, highlight)
 	{
-		var h3 = dc.getHeight () / 3;
+		var height = dc.getHeight();
+		var h3 = height / 3;
+	
+		if (idx >= menu.menuArray.size())
+		{
+			dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_WHITE);
+			dc.fillRectangle (0, y, dc.getWidth(), height); // using height instead of (height-y) because of rounding issues when animating 
+			return;
+		}
 
 		// Cannot see item if it doesn't exist or will not be visible.
-		if (idx < 0 || idx >= menu.menuArray.size () || 
-			menu.menuArray[idx] == null || y > dc.getHeight () || y < -h3)
+		if (idx < 0 || 
+			menu.menuArray[idx] == null || y > height || y < -h3)
 		{
 			return;
 		}
