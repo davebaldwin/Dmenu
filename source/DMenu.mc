@@ -146,27 +146,33 @@ class DMenu extends Ui.View
 	
 	//const ANIM_TIME = 0.3;
 	const ANIM_TIME = 0; //disable animation
+	
 	// NOTE: animation seems to be broken on physical devices like 630 (and maybe its
 	// siblings like 230, 235, and 735XT)
 	// https://forums.garmin.com/forum/developers/connect-iq/158754-
 	//
 	// I don't recommend enabling animation unless you are sure it will work
 	// on the devices you are targetting.
-	function updateIndex (offset)
+	function updateIndex (offset, wrap)
 	{
 		if (menuArray.size () <= 1)
 		{
 			return;
 		}
 		
+		nextIndex = index + offset;
+		if (!wrap && (nextIndex < 0 || nextIndex >= menuArray.size()))
+		{
+			nextIndex = index;
+			return;
+		}
+		 
 		if (ANIM_TIME > 0)
 		{
 			// Scroll up/down. Use +/-1000 as end value as cannot use 1. Scale as necessary in draw call.
 			drawMenu.t = offset * 1000;
 			Ui.animate (drawMenu, :t, Ui.ANIM_TYPE_LINEAR, drawMenu.t, 0, ANIM_TIME, method(:animateComplete));
 		}
-		
-		nextIndex = index + offset;
 		
 		// Cope with a 'feature' in modulo operator not handling -ve numbers as desired.
 		nextIndex = nextIndex < 0 ? menuArray.size () + nextIndex : nextIndex;
@@ -272,7 +278,6 @@ class DrawMenu extends Ui.Drawable
 		
 		nextIndex = menu.nextIndex;
 
-		//System.println("t = " + t);
 		// y for the middle of the three items.  
 		var y = h3 + (t / 1000.0) * h3;
 		
@@ -342,15 +347,14 @@ class DMenuDelegate extends Ui.BehaviorDelegate
 		var d = swipeEvent.getDirection();
 		if (d == WatchUi.SWIPE_UP)
 		{
-			return onNextPage();
+			return onNextPage_touch();
 		} 
 		if (d == WatchUi.SWIPE_DOWN)
 		{
-			return onPreviousPage();
+			return onPreviousPage_touch();
 		} 
 		
 		return false;
-		
 	}
 	
 	function onTap(clickEvent)
@@ -365,11 +369,11 @@ class DMenuDelegate extends Ui.BehaviorDelegate
 				var h3 = menu.menuHeight  / 3;
 				if (c[1] > h3*2)
 				{
-					return onNextPage();
+					return onNextPage_touch();
 				} 
 				else if (c[1] < h3)
 				{
-					return onPreviousPage();
+					return onPreviousPage_touch();
 				}
 			}
 			
@@ -380,17 +384,29 @@ class DMenuDelegate extends Ui.BehaviorDelegate
 		return false;
 		
 	}
-	
-	
-	function onNextPage()
+
+	protected function onNextPage_touch()
 	{
-		menu.updateIndex (1);
+		menu.updateIndex(1, false);
 		return true;
 	}
 	
-	function onPreviousPage ()
+	protected function onPreviousPage_touch()
 	{
-		menu.updateIndex (-1);
+		menu.updateIndex(-1, false);
+		return true;		
+	}
+
+	
+	function onNextPage()
+	{
+		menu.updateIndex(1, true);
+		return true;
+	}
+	
+	function onPreviousPage()
+	{
+		menu.updateIndex(-1, true);
 		return true;		
 	}
 	
