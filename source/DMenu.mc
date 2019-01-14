@@ -146,31 +146,35 @@ class DMenu extends Ui.View
 	
 	//const ANIM_TIME = 0.3;
 	const ANIM_TIME = 0; //disable animation
-	function updateIndex (offset)
+	
+	// NOTE: animation seems to be broken on physical devices like 630 (and maybe its
+	// siblings like 230, 235, and 735XT)
+	// https://forums.garmin.com/forum/developers/connect-iq/158754-
+	//
+	// I don't recommend enabling animation unless you are sure it will work
+	// on the devices you are targetting.
+	function updateIndex (offset, wrap)
 	{
 		if (menuArray.size () <= 1)
 		{
 			return;
 		}
 		
-		if (offset == 1)
+		nextIndex = index + offset;
+		if (!wrap && (nextIndex < 0 || nextIndex >= menuArray.size()))
 		{
-			// Scroll down. Use 1000 as end value as cannot use 1. Scale as necessary in draw call.
-			if (ANIM_TIME > 0)
-			{
-				Ui.animate (drawMenu, :t, Ui.ANIM_TYPE_LINEAR, 1000, 0, ANIM_TIME, method(:animateComplete));
-			}
-		}
-		else
-		{
-			// Scroll up.
-			if (ANIM_TIME > 0)
-			{
-				Ui.animate (drawMenu, :t, Ui.ANIM_TYPE_LINEAR, -1000, 0, ANIM_TIME, method(:animateComplete));
-			}
+			nextIndex = index;
+			return;
 		}
 		
-		nextIndex = index + offset;
+		// Don't animate anything if we are wrap scrolling past the bottom
+		// It just looks weird no matter what
+		if (!(offset > 0 && nextIndex >= menuArray.size()) && ANIM_TIME > 0)
+		{
+			// Scroll up/down. Use +/-1000 as end value as cannot use 1. Scale as necessary in draw call.
+			drawMenu.t = offset * 1000;
+			Ui.animate (drawMenu, :t, Ui.ANIM_TYPE_LINEAR, drawMenu.t, 0, ANIM_TIME, method(:animateComplete));
+		}
 		
 		// Cope with a 'feature' in modulo operator not handling -ve numbers as desired.
 		nextIndex = nextIndex < 0 ? menuArray.size () + nextIndex : nextIndex;
@@ -207,14 +211,10 @@ class DMenu extends Ui.View
 		
 		drawMenu.draw (dc);
 		
-		// Draw the decorations.
-		var h3 = height / 3;
-        dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_WHITE);
-		dc.setPenWidth (2);
-		dc.drawLine (0, h3, width, h3);
-		dc.drawLine (0, h3 * 2, width, h3 * 2);
-		
-		drawArrows (dc);
+		if (drawMenu.t == 0)
+		{
+			drawArrows (dc);
+		}
 	}
 	
 	const GAP = 5;
@@ -259,6 +259,9 @@ class DrawMenu extends Ui.Drawable
 {
 	const TITLE_FONT = Gfx.FONT_SMALL;
 
+	var animateSeparators = true; // 935 animates separators, older watches like 230 and fenix 3 don't
+	var fillEmptySpace = true; // 935 fills unused space with black, fenix 3 doesn't
+
 	var t = 0;				// 'time' in the animation cycle 0...1000 or -1000...0.
 	var index, nextIndex, menu;
 			
@@ -282,10 +285,50 @@ class DrawMenu extends Ui.Drawable
 		// Depending on where we are in the menu and in the animation some of 
 		// these will be unnecessary but it is easier to draw everything and
 		// rely on clipping to avoid unnecessary drawing calls.
-		drawTitle (dc, y - nextIndex * h3 - h3);
+		
+		// Don't animate the title if we're wrap scrolling
+		var titleY;
+		if ((nextIndex == 0 && t < 0) || (nextIndex == 1)) // normal scrolling
+		{
+			titleY = y;
+		}
+		else // wrap scroll
+		{
+			titleY = h3;
+		} 
+		drawTitle (dc, titleY - nextIndex * h3 - h3);
+		
 		for (var i = -2; i < 3; i++)
 		{
 			drawItem (dc, nextIndex + i, y + h3 * i, i == 0);
+			
+		}
+		
+		dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_WHITE);
+		dc.setPenWidth(2);
+		
+		var separatorY = animateSeparators ? y : h3;
+		
+		/// Line above first item that is only visible
+		// when animating
+		if (t > 0 && nextIndex != 0)
+		{
+			dc.drawLine(0, separatorY - h3, dc.getWidth(), separatorY - h3);
+		}
+		
+		// Line below first item
+		if (nextIndex > 0 || !animateSeparators)
+		{
+			dc.drawLine(0, separatorY, dc.getWidth(), separatorY);
+		}
+		
+		// Line below second item
+		dc.drawLine(0, separatorY + h3, dc.getWidth(), separatorY + h3);
+		
+		// Line below third item that is only visible when animating
+		if (t < 0 && nextIndex !=  menu.menuArray.size()-1)
+		{
+			dc.drawLine(0, separatorY + 2 * h3, dc.getWidth(), separatorY + 2 * h3);
 		}
 	}
 	
@@ -300,8 +343,9 @@ class DrawMenu extends Ui.Drawable
 			return;
 		}
 
-        dc.setColor (Gfx.COLOR_BLACK, Gfx.COLOR_WHITE);
-        dc.fillRectangle (0, y, width, h3);
+		dc.setColor (Gfx.COLOR_BLACK, Gfx.COLOR_WHITE);
+//        dc.fillRectangle (0, y, width, h3);
+		dc.fillRectangle (0, 0, width, y+h3); // this looks better if we were animating title, which we're not
 
 		if (menu.title != null)
 		{
@@ -315,11 +359,22 @@ class DrawMenu extends Ui.Drawable
 	// highlight is the selected menu item that can optionally show a value.
 	function drawItem (dc, idx, y, highlight)
 	{
-		var h3 = dc.getHeight () / 3;
+		var height = dc.getHeight();
+		var h3 = height / 3;
+	
+		if (idx >= menu.menuArray.size())
+		{
+			if (fillEmptySpace)
+			{
+				dc.setColor(Gfx.COLOR_BLACK, Gfx.COLOR_WHITE);
+				dc.fillRectangle (0, y, dc.getWidth(), height); // using height instead of (height-y) because of rounding issues when animating 
+			}
+			return;
+		}
 
 		// Cannot see item if it doesn't exist or will not be visible.
-		if (idx < 0 || idx >= menu.menuArray.size () || 
-			menu.menuArray[idx] == null || y > dc.getHeight () || y < -h3)
+		if (idx < 0 || 
+			menu.menuArray[idx] == null || y > height || y < -h3)
 		{
 			return;
 		}
@@ -345,15 +400,14 @@ class DMenuDelegate extends Ui.BehaviorDelegate
 		var d = swipeEvent.getDirection();
 		if (d == WatchUi.SWIPE_UP)
 		{
-			return onNextPage();
+			return onNextPage_touch();
 		} 
 		if (d == WatchUi.SWIPE_DOWN)
 		{
-			return onPreviousPage();
+			return onPreviousPage_touch();
 		} 
 		
 		return false;
-		
 	}
 	
 	function onTap(clickEvent)
@@ -368,11 +422,11 @@ class DMenuDelegate extends Ui.BehaviorDelegate
 				var h3 = menu.menuHeight  / 3;
 				if (c[1] > h3*2)
 				{
-					return onNextPage();
+					return onNextPage_touch();
 				} 
 				else if (c[1] < h3)
 				{
-					return onPreviousPage();
+					return onPreviousPage_touch();
 				}
 			}
 			
@@ -383,18 +437,49 @@ class DMenuDelegate extends Ui.BehaviorDelegate
 		return false;
 		
 	}
-	
-	
-	function onNextPage()
+
+	protected function onNextPage_touch()
 	{
-		menu.updateIndex (1);
+		menu.updateIndex(1, false);
 		return true;
 	}
 	
-	function onPreviousPage ()
+	protected function onPreviousPage_touch()
 	{
-		menu.updateIndex (-1);
+		menu.updateIndex(-1, false);
 		return true;		
+	}
+
+	function onNextPage_key()
+	{
+		menu.updateIndex(1, true);
+		return true;
+	}
+	
+	function onPreviousPage_key()
+	{
+		menu.updateIndex(-1, true);
+		return true;		
+	}
+	
+	// Sadly we can't handle onNextPage/onPreviousPage(), because
+	//   device behaviour is inconsistent:
+	// - Vivoactive, VAHR and 630 trigger these behaviours on left/right swipe 
+	//      (which doesn't make sense for vertical menu)
+	// - Vivoactive does not even support up/down swipe, so tap support
+	//   is mandatory
+	// - VA3 triggers these behaviour on up/down swipe
+	//
+	// The only thing to do is to handle the keys, swipes, and taps
+	// directly
+	function onNextPage()
+	{
+		return false;
+	}
+	
+	function onPreviousPage()
+	{
+		return false;
 	}
 	
 	function onSelect ()
@@ -404,6 +489,16 @@ class DMenuDelegate extends Ui.BehaviorDelegate
 	
 	function onKey(keyEvent) {
 		var k = keyEvent.getKey();
+		
+		if (k == WatchUi.KEY_UP)
+		{
+			return onPreviousPage_key();
+		}
+		if (k == WatchUi.KEY_DOWN)
+		{
+			return onNextPage_key();
+		}
+		
 		
 		if (k == WatchUi.KEY_START || k == WatchUi.KEY_ENTER )
 		{		
