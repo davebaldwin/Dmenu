@@ -19,7 +19,7 @@ class AlarmDelegate extends Ui.MenuInputDelegate {
 	{
  		if (item.id == :AddAlarm)
 		{
-			var time = [Math.rand () % 12, Math.rand () % 60];
+			var time = [Math.rand () % 12, (Math.rand () % 60).format("%02d")];
 			var timeStr = Lang.format("$1$:$2$ am", time);
 			var on = [true, false][Math.rand () % 2];
 
