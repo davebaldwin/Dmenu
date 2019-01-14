@@ -2,11 +2,11 @@
 
 DMenu.mc is an implementation of a dynamic menu where the menu ordering and length can be changed and an optional value line can be shown below the menu item name.  
 
+image:misc/dmenu_f3.png[]
+
 It is similar to how the Alarm Clock menu (menu -> Clock -> Alarm Clock) works.
 
 A rather trivial app is included to demonstrate its use.  Every other alarm will show an icon and selecting an alarm will toggle the On/Off status.
-
-image:misc/dmenu_f3.png[]
 
 == Changing The Look of a Menu
 
